@@ -6,6 +6,7 @@ import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
+import dk.sdu.mmmi.cbse.enemysystem.Enemy;
 
 public class CollisionDetector implements IPostEntityProcessingService {
 
@@ -29,9 +30,21 @@ public class CollisionDetector implements IPostEntityProcessingService {
                     world.removeEntity(entity1);
                     world.removeEntity(entity2);
                 }
+                if (entity1 instanceof Bullet && entity2 instanceof Enemy) {
+                    // If entity1 is a bullet and entity2 is an enemy, remove both entities
+                    world.removeEntity(entity1);
+                    world.removeEntity(entity2);
+                    spawnNewEnemy(gameData, world);
+                }
             }
         }
     }
+
+    private void spawnNewEnemy(GameData gameData, World world) {
+        Entity enemy = Enemy.createEnemy(gameData);
+        world.addEntity(enemy);
+    }
+
 
     public Boolean collides(Entity entity1, Entity entity2) {
         float dx = (float) entity1.getX() - (float) entity2.getX();
