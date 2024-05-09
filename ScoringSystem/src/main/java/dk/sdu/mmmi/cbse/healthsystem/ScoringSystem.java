@@ -17,7 +17,7 @@ public class ScoringSystem {
     }
 
     @GetMapping("/score")
-    public Long calculateHealt(@RequestParam(value = "point") Long point) {
+    public Long calculateScore(@RequestParam(value = "point") Long point) {
         totalScore += point;
         return totalScore ;
     }
