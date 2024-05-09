@@ -5,28 +5,29 @@ import dk.sdu.mmmi.cbse.common.asteroids.IAsteroidSplitter;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.World;
 
+import java.util.Random;
+
 public class AsteroidSplitterImpl implements IAsteroidSplitter {
+
+    private static final int MIN_SPLIT_SIZE = 20;
+
     @Override
-    public void createSplitAsteroid(Entity e, World w) {
-        // Create two new asteroids based on the properties of the original asteroid
-        Entity newAsteroid1 = createAsteroidBasedOn(e);
-        Entity newAsteroid2 = createAsteroidBasedOn(e);
+    public void createSplitAsteroid(Entity asteroid, World world) {
+        System.out.println("Creating split asteroid");
 
-        // Add the new asteroids to the world
-        w.addEntity(newAsteroid1);
-        w.addEntity(newAsteroid2);
-    }
+        world.removeEntity(asteroid);
 
-    // Helper method to create a new asteroid based on the properties of an existing asteroid
-    private Entity createAsteroidBasedOn(Entity originalAsteroid) {
-        Entity newAsteroid = new Asteroid();
-        // Copy properties from the original asteroid
-        newAsteroid.setPolygonCoordinates(originalAsteroid.getPolygonCoordinates());
-        newAsteroid.setX(originalAsteroid.getX());
-        newAsteroid.setY(originalAsteroid.getY());
-        newAsteroid.setRadius(originalAsteroid.getRadius());
-        newAsteroid.setRotation(originalAsteroid.getRotation());
-        // Add any additional logic for the new asteroid if needed
-        return newAsteroid;
+        if (asteroid.getRadius() < MIN_SPLIT_SIZE) {
+            return;
+        }
+
+        Asteroid newAsteroid = new Asteroid();
+        int size = (int) (asteroid.getRadius() * 0.5);
+        newAsteroid.setRadius(size);
+        newAsteroid.setPolygonCoordinates(size, -size, -size, -size, -size, size, size, size);
+        newAsteroid.setX(asteroid.getX());
+        newAsteroid.setY(asteroid.getY());
+        newAsteroid.setRadius(size);
+        world.addEntity(newAsteroid);
     }
 }

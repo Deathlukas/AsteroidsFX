@@ -1,6 +1,9 @@
 package dk.sdu.mmmi.cbse.main;
 
+import dk.sdu.mmmi.cbse.asteroid.AsteroidSplitterImpl;
+import dk.sdu.mmmi.cbse.collisionsystem.CollisionDetector;
 import dk.sdu.mmmi.cbse.common.asteroids.Asteroid;
+import dk.sdu.mmmi.cbse.common.asteroids.IAsteroidSplitter;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.GameKeys;
@@ -40,7 +43,12 @@ public class Main extends Application {
 
     @Override
     public void start(Stage window) throws Exception {
-        Text text = new Text(10, 20, "Destroyed asteroids: 0");
+        IAsteroidSplitter asteroidSplitter = new AsteroidSplitterImpl();
+
+        // Instantiate CollisionDetector with asteroidSplitter
+        CollisionDetector collisionDetector = new CollisionDetector(asteroidSplitter);
+
+        Text text = new Text(10, 20, "Destroyed asteroids: ");
         gameWindow = new Pane();
         gameWindow.setPrefSize(gameData.getDisplayWidth(), gameData.getDisplayHeight());
         gameWindow.getChildren().add(text);

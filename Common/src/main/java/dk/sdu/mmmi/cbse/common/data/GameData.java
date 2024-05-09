@@ -6,6 +6,8 @@ public class GameData {
     private int displayHeight = 800;
     private final GameKeys keys = new GameKeys();
 
+    private int destroyedAsteroids = 0;
+
 
     public GameKeys getKeys() {
         return keys;
@@ -27,5 +29,7 @@ public class GameData {
         return displayHeight;
     }
 
-
+    public void incrementDestroyedAsteroids() {
+        destroyedAsteroids++;
+    }
 }

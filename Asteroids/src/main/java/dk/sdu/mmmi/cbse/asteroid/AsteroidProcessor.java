@@ -13,26 +13,25 @@ public class AsteroidProcessor implements IEntityProcessingService {
 
     private IAsteroidSplitter asteroidSplitter = new AsteroidSplitterImpl();
 
-    private static final int MIN_ASTEROIDS = 3; // Minimum number of asteroids to maintain
-    private static final int MAX_ASTEROIDS = 6; // Maximum number of asteroids allowed
+    private static final int MIN_ASTEROIDS = 3;
+    private static final int MAX_ASTEROIDS = 6;
+
+    private static final int MAX_SPLIT_COUNT = 3;
+
     @Override
     public void process(GameData gameData, World world) {
-        // Ensure there are enough asteroids in the world
         int currentAsteroids = world.getEntities(Asteroid.class).size();
         while (currentAsteroids < MIN_ASTEROIDS) {
             spawnAsteroid(world, gameData);
-            currentAsteroids++; // Increment the current number of asteroids
+            currentAsteroids++;
         }
 
-        // Move existing asteroids
         for (Entity asteroid : world.getEntities(Asteroid.class)) {
-            // Move asteroid based on its rotation
             double changeX = Math.cos(Math.toRadians(asteroid.getRotation())) * 5;
             double changeY = Math.sin(Math.toRadians(asteroid.getRotation())) * 5;
             asteroid.setX(asteroid.getX() + changeX);
             asteroid.setY(asteroid.getY() + changeY);
 
-            // Check if asteroid moves out of bounds and reset its position
             if (asteroid.getX() < 0) {
                 asteroid.setX(gameData.getDisplayWidth());
             } else if (asteroid.getX() > gameData.getDisplayWidth()) {
@@ -43,6 +42,16 @@ public class AsteroidProcessor implements IEntityProcessingService {
             } else if (asteroid.getY() > gameData.getDisplayHeight()) {
                 asteroid.setY(0);
             }
+            if (asteroid.getRadius() > 6 && asteroid.getRadius() % 6 == 0) {
+                splitAsteroidIfNeeded((Asteroid) asteroid, world);
+            }
+        }
+    }
+
+    private void splitAsteroidIfNeeded(Asteroid asteroid, World world) {
+        if (asteroid.getSplitCount() < MAX_SPLIT_COUNT) {
+            asteroidSplitter.createSplitAsteroid(asteroid, world);
+            asteroid.incrementSplitCount(); // Increment split count
         }
     }
 
@@ -68,10 +77,6 @@ public class AsteroidProcessor implements IEntityProcessingService {
         asteroid.setY(rnd.nextInt(gameData.getDisplayHeight())); // Random Y position within display height
         asteroid.setRadius(20);
         asteroid.setRotation(rnd.nextInt(360));  // Random rotation angle (0 to 359 degrees)
-
-        System.out.println("New asteroid created: " + asteroid);
-        System.out.println("Position: (" + asteroid.getX() + ", " + asteroid.getY() + ")");
-
         return asteroid;
     }
 
