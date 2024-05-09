@@ -19,7 +19,7 @@ public class PlayerPlugin implements IGamePluginService {
         world.addEntity(player);
     }
 
-    private Entity createPlayerShip(GameData gameData) {
+    Entity createPlayerShip(GameData gameData) {
 
         Entity playerShip = new Player();
         playerShip.setPolygonCoordinates(-5,-5,10,0,-5,5);
@@ -34,4 +34,7 @@ public class PlayerPlugin implements IGamePluginService {
         world.removeEntity(player);
     }
 
+    public Object getPlayer() {
+        return player;
+    }
 }

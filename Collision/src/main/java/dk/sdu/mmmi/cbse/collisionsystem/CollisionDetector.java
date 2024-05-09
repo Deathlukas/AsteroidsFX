@@ -43,10 +43,12 @@ public class CollisionDetector implements IPostEntityProcessingService {
         }
     }
 
-    private void handleBulletCollision(Entity bullet, World world, List<Entity> asteroidsToRemove, GameData gameData) {
+    void handleBulletCollision(Entity bullet, World world, List<Entity> asteroidsToRemove, GameData gameData) {
         for (Entity asteroid : world.getEntities(Asteroid.class)) {
             if (collides(bullet, asteroid)) {
                 world.removeEntity(bullet);
+                System.out.println("Bullet position: (" + bullet.getX() + ", " + bullet.getY() + "), radius: " + bullet.getRadius());
+                System.out.println("Asteroid position: (" + asteroid.getX() + ", " + asteroid.getY() + "), radius: " + asteroid.getRadius());
                 asteroidsToRemove.add(asteroid);
                 break;
             }
@@ -91,7 +93,7 @@ public class CollisionDetector implements IPostEntityProcessingService {
         world.addEntity(enemy);
     }
 
-    private boolean collides(Entity entity1, Entity entity2) {
+    public boolean collides(Entity entity1, Entity entity2) {
         float dx = (float) (entity1.getX() - entity2.getX());
         float dy = (float) (entity1.getY() - entity2.getY());
         float distanceSquared = dx * dx + dy * dy;
