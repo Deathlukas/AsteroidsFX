@@ -8,6 +8,7 @@ import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
+import dk.sdu.mmmi.cbse.enemysystem.Enemy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +30,12 @@ public class CollisionDetector implements IPostEntityProcessingService {
     public void process(GameData gameData, World world) {
         List<Entity> asteroidsToRemove = new ArrayList<>();
 
-        for (Entity entity : world.getEntities()) {
-            if (entity instanceof Bullet) {
-                handleBulletCollision(entity, world, asteroidsToRemove);
-            } else if (entity instanceof Asteroid) {
-                handleAsteroidCollision(entity, world, asteroidsToRemove);
-            }
+        for (Entity bullet : world.getEntities(Bullet.class)) {
+            handleBulletCollision(bullet, world, asteroidsToRemove, gameData);
+        }
+
+        for (Entity asteroid : world.getEntities(Asteroid.class)) {
+            handleAsteroidCollision(asteroid, world, asteroidsToRemove);
         }
 
         for (Entity asteroid : asteroidsToRemove) {
@@ -42,12 +43,21 @@ public class CollisionDetector implements IPostEntityProcessingService {
         }
     }
 
-    private void handleBulletCollision(Entity bullet, World world, List<Entity> asteroidsToRemove) {
-        for (Entity entity : world.getEntities()) {
-            if (entity instanceof Asteroid && collides(bullet, entity)) {
+    private void handleBulletCollision(Entity bullet, World world, List<Entity> asteroidsToRemove, GameData gameData) {
+        for (Entity asteroid : world.getEntities(Asteroid.class)) {
+            if (collides(bullet, asteroid)) {
                 world.removeEntity(bullet);
-                asteroidsToRemove.add(entity);
+                asteroidsToRemove.add(asteroid);
                 break;
+            }
+        }
+
+        for (Entity enemy : world.getEntities(Enemy.class)) {
+            if (collides(bullet, enemy)) {
+                world.removeEntity(bullet);
+                world.removeEntity(enemy);
+                spawnNewEnemy(gameData, world);
+                return;
             }
         }
     }
@@ -74,6 +84,11 @@ public class CollisionDetector implements IPostEntityProcessingService {
 
     private boolean canSplit(Asteroid asteroid) {
         return asteroid.getSplitCount() < MAX_SPLIT_COUNT;
+    }
+
+    private void spawnNewEnemy(GameData gameData, World world) {
+        Entity enemy = Enemy.createEnemy(gameData);
+        world.addEntity(enemy);
     }
 
     private boolean collides(Entity entity1, Entity entity2) {
