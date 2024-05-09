@@ -22,12 +22,11 @@ public class AsteroidSplitterImpl implements IAsteroidSplitter {
         }
 
         Asteroid newAsteroid = new Asteroid();
-        int size = (int) (asteroid.getRadius() * 0.5);
+        int size = 10;
         newAsteroid.setRadius(size);
         newAsteroid.setPolygonCoordinates(size, -size, -size, -size, -size, size, size, size);
         newAsteroid.setX(asteroid.getX());
         newAsteroid.setY(asteroid.getY());
-        newAsteroid.setRadius(size);
         world.addEntity(newAsteroid);
     }
 }
