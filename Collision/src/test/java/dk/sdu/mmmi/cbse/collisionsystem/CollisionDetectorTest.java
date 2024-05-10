@@ -4,14 +4,14 @@ import dk.sdu.mmmi.cbse.asteroid.AsteroidSplitterImpl;
 import dk.sdu.mmmi.cbse.common.asteroids.Asteroid;
 import dk.sdu.mmmi.cbse.common.asteroids.IAsteroidSplitter;
 import dk.sdu.mmmi.cbse.common.bullet.Bullet;
+import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.enemysystem.Enemy;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class CollisionDetectorTest {
 
@@ -82,5 +82,39 @@ public class CollisionDetectorTest {
         collisionDetector.process(gameData, world);
 
         assertEquals("Bullet and enemy should not collide", 2, world.getEntities().size());
+    }
+    @Test
+    public void testCollision() {
+
+        CollisionDetector collisionDetector = new CollisionDetector();
+
+        Entity entity1 = new Entity();
+        entity1.setX(0);
+        entity1.setY(0);
+        entity1.setRadius(5);
+
+        Entity entity2 = new Entity();
+        entity2.setX(5);
+        entity2.setY(0);
+        entity2.setRadius(5);
+
+        assertTrue("Entities should collide", collisionDetector.collides(entity1, entity2));
+    }
+    @Test
+    public void testNoCollision() {
+
+        CollisionDetector collisionDetector = new CollisionDetector();
+
+        Entity entity1 = new Entity();
+        entity1.setX(0);
+        entity1.setY(0);
+        entity1.setRadius(5);
+
+        Entity entity2 = new Entity();
+        entity2.setX(20);
+        entity2.setY(20);
+        entity2.setRadius(5);
+
+        assertFalse("Entities should not collide", collisionDetector.collides(entity1, entity2));
     }
 }

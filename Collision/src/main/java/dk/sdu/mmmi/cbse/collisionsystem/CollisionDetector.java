@@ -93,11 +93,10 @@ public class CollisionDetector implements IPostEntityProcessingService {
         world.addEntity(enemy);
     }
 
-    public boolean collides(Entity entity1, Entity entity2) {
-        float dx = (float) (entity1.getX() - entity2.getX());
-        float dy = (float) (entity1.getY() - entity2.getY());
-        float distanceSquared = dx * dx + dy * dy;
-        float radiusSum = entity1.getRadius() + entity2.getRadius();
-        return distanceSquared <= radiusSum * radiusSum;
+    public Boolean collides ( Entity entity1 , Entity entity2 ) {
+        float dx = ( float ) entity1 . getX () - ( float ) entity2 . getX () ;
+        float dy = ( float ) entity1 . getY () - ( float ) entity2 . getY () ;
+        float distance = ( float ) Math . sqrt ( dx * dx + dy * dy ) ;
+        return distance < ( entity1 . getRadius () + entity2 . getRadius () ) ;
     }
 }
