@@ -1,29 +1,35 @@
 package dk.sdu.mmmi.cbse.collisionsystem;
 
-import dk.sdu.mmmi.cbse.asteroid.AsteroidSplitterImpl;
-import dk.sdu.mmmi.cbse.common.asteroids.Asteroid;
 import dk.sdu.mmmi.cbse.common.asteroids.IAsteroidSplitter;
 import dk.sdu.mmmi.cbse.common.bullet.Bullet;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
-import dk.sdu.mmmi.cbse.enemysystem.Enemy;
+import dk.sdu.mmmi.cbse.common.asteroids.Asteroid;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceLoader;
 
 public class CollisionDetector implements IPostEntityProcessingService {
 
     private IAsteroidSplitter asteroidSplitter;
     private static final int MAX_SPLIT_COUNT = 2;
 
-    public CollisionDetector(IAsteroidSplitter asteroidSplitter) {
-        this.asteroidSplitter = asteroidSplitter;
+    public CollisionDetector() {
+        ServiceLoader<IAsteroidSplitter> loader = ServiceLoader.load(IAsteroidSplitter.class);
+        for (IAsteroidSplitter splitter : loader) {
+            this.asteroidSplitter = splitter;
+            break;
+        }
+        if (this.asteroidSplitter == null) {
+            this.asteroidSplitter = new DefaultAsteroidSplitter();
+        }
     }
 
-    public CollisionDetector() {
-        this.asteroidSplitter = (IAsteroidSplitter) new AsteroidSplitterImpl();
+    public CollisionDetector(IAsteroidSplitter asteroidSplitter) {
+        this.asteroidSplitter = asteroidSplitter;
     }
 
     @Override
@@ -49,15 +55,6 @@ public class CollisionDetector implements IPostEntityProcessingService {
                 world.removeEntity(bullet);
                 asteroidsToRemove.add(asteroid);
                 break;
-            }
-        }
-
-        for (Entity enemy : world.getEntities(Enemy.class)) {
-            if (collides(bullet, enemy)) {
-                world.removeEntity(bullet);
-                world.removeEntity(enemy);
-                spawnNewEnemy(gameData, world);
-                return;
             }
         }
     }
@@ -86,15 +83,16 @@ public class CollisionDetector implements IPostEntityProcessingService {
         return asteroid.getSplitCount() < MAX_SPLIT_COUNT;
     }
 
-    private void spawnNewEnemy(GameData gameData, World world) {
-        Entity enemy = Enemy.createEnemy(gameData);
-        world.addEntity(enemy);
+    public Boolean collides(Entity entity1, Entity entity2) {
+        float dx = (float) (entity1.getX() - entity2.getX());
+        float dy = (float) (entity1.getY() - entity2.getY());
+        float distance = (float) Math.sqrt(dx * dx + dy * dy);
+        return distance < (entity1.getRadius() + entity2.getRadius());
     }
 
-    public Boolean collides ( Entity entity1 , Entity entity2 ) {
-        float dx = ( float ) entity1 . getX () - ( float ) entity2 . getX () ;
-        float dy = ( float ) entity1 . getY () - ( float ) entity2 . getY () ;
-        float distance = ( float ) Math . sqrt ( dx * dx + dy * dy ) ;
-        return distance < ( entity1 . getRadius () + entity2 . getRadius () ) ;
+    private static class DefaultAsteroidSplitter implements IAsteroidSplitter {
+        @Override
+        public void createSplitAsteroid(Entity asteroid, World world) {
+        }
     }
 }

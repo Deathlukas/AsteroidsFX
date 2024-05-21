@@ -56,15 +56,12 @@ public class AsteroidProcessor implements IEntityProcessingService {
     }
 
     private void spawnAsteroid(World world, GameData gameData) {
-        // Ensure maximum number of asteroids is not exceeded
         if (world.getEntities(Asteroid.class).size() >= MAX_ASTEROIDS) {
             return;
         }
 
-        // Create a new asteroid
         Entity asteroid = createAsteroid(gameData);
 
-        // Add the new asteroid to the world
         world.addEntity(asteroid);
     }
 
@@ -76,7 +73,7 @@ public class AsteroidProcessor implements IEntityProcessingService {
         asteroid.setX(rnd.nextInt(gameData.getDisplayWidth()));  // Random X position within display width
         asteroid.setY(rnd.nextInt(gameData.getDisplayHeight())); // Random Y position within display height
         asteroid.setRadius(20);
-        asteroid.setRotation(rnd.nextInt(360));  // Random rotation angle (0 to 359 degrees)
+        asteroid.setRotation(rnd.nextInt(360));
         return asteroid;
     }
 

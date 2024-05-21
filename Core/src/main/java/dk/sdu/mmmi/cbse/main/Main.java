@@ -1,8 +1,6 @@
 package dk.sdu.mmmi.cbse.main;
 
-import dk.sdu.mmmi.cbse.asteroid.AsteroidSplitterImpl;
-import dk.sdu.mmmi.cbse.collisionsystem.CollisionDetector;
-import dk.sdu.mmmi.cbse.common.asteroids.Asteroid;
+
 import dk.sdu.mmmi.cbse.common.asteroids.IAsteroidSplitter;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
@@ -11,14 +9,6 @@ import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.concurrent.ConcurrentHashMap;
-import static java.util.stream.Collectors.toList;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -28,6 +18,15 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.stream.Collectors.toList;
+
 public class Main extends Application {
 
     private final GameData gameData = new GameData();
@@ -35,7 +34,6 @@ public class Main extends Application {
     private final Map<Entity, Polygon> polygons = new ConcurrentHashMap<>();
 
     private Pane gameWindow;
-    
 
     public static void main(String[] args) {
         launch(Main.class);
@@ -43,10 +41,6 @@ public class Main extends Application {
 
     @Override
     public void start(Stage window) throws Exception {
-        IAsteroidSplitter asteroidSplitter = new AsteroidSplitterImpl();
-
-        // Instantiate CollisionDetector with asteroidSplitter
-        CollisionDetector collisionDetector = new CollisionDetector(asteroidSplitter);
 
         Text text = new Text(10, 20, "Destroyed asteroids: ");
         gameWindow = new Pane();
@@ -81,10 +75,8 @@ public class Main extends Application {
             if (event.getCode().equals(KeyCode.SPACE)) {
                 gameData.getKeys().setKey(GameKeys.SPACE, false);
             }
-
         });
 
-        // Lookup all Game Plugins using ServiceLoader
         for (IGamePluginService iGamePlugin : getPluginServices()) {
             iGamePlugin.start(gameData, world);
         }
@@ -99,38 +91,31 @@ public class Main extends Application {
         window.setScene(scene);
         window.setTitle("ASTEROIDS");
         window.show();
-
     }
 
     private void render() {
         new AnimationTimer() {
-            private long then = 0;
-
             @Override
             public void handle(long now) {
                 update();
                 draw();
                 gameData.getKeys().update();
             }
-
         }.start();
     }
 
     private void update() {
-
-        // Update
         for (IEntityProcessingService entityProcessorService : getEntityProcessingServices()) {
             entityProcessorService.process(gameData, world);
         }
-       for (IPostEntityProcessingService postEntityProcessorService : getPostEntityProcessingServices()) {
+        for (IPostEntityProcessingService postEntityProcessorService : getPostEntityProcessingServices()) {
             postEntityProcessorService.process(gameData, world);
-      }
+        }
     }
 
     private void draw() {
         List<Entity> entitiesToRemove = new ArrayList<>();
 
-        // Update polygons for existing entities and mark entities to be removed
         for (Entity entity : world.getEntities()) {
             Polygon polygon = polygons.get(entity);
             if (polygon == null) {
@@ -143,7 +128,6 @@ public class Main extends Application {
             polygon.setRotate(entity.getRotation());
         }
 
-        // Remove polygons for entities that have been removed from the world
         for (Entity entity : polygons.keySet()) {
             if (!world.getEntities().contains(entity)) {
                 Polygon polygon = polygons.get(entity);
@@ -152,10 +136,15 @@ public class Main extends Application {
             }
         }
 
-        // Clean up polygons map
         for (Entity entity : entitiesToRemove) {
             polygons.remove(entity);
         }
+    }
+
+    private IAsteroidSplitter getAsteroidSplitterService() {
+        return ServiceLoader.load(IAsteroidSplitter.class)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No IAsteroidSplitter implementation found"));
     }
 
     private Collection<? extends IGamePluginService> getPluginServices() {
